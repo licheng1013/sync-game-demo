@@ -23,5 +23,11 @@
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
         </dependency>
+        <!--IoGame组件-->
+        <dependency>
+            <groupId>com.iohao.game</groupId>
+            <artifactId>bolt-run-one</artifactId>
+            <version>17.1.25</version>
+        </dependency>
     </dependencies>
 </project>

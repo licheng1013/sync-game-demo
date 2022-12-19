@@ -2,8 +2,11 @@
 https://www.yuque.com/iohao/game/irth38#cJLdC
 
 ==================== SyncAction  ====================
-路由: 1 - 1  --- 【】 --- 【SyncAction:22】【sync】
+路由: 1 - 2  --- 【】 --- 【SyncAction:50】【test】
     方法参数: com.aiwan.Move
+    方法返回值: void
+ 
+路由: 1 - 3  --- 【】 --- 【SyncAction:32】【login】
     方法返回值: void
  
 

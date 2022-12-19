@@ -1,10 +1,10 @@
 package com.aiwan;
 
+import com.aiwan.config.MyUserHook;
 import com.aiwan.service.SpringLogicServer;
-import com.iohao.game.action.skeleton.core.IoGameGlobalSetting;
-import com.iohao.game.action.skeleton.core.codec.JsonDataCodec;
 import com.iohao.game.action.skeleton.ext.spring.ActionFactoryBeanForSpring;
 import com.iohao.game.bolt.broker.client.external.ExternalServer;
+import com.iohao.game.bolt.broker.client.external.session.UserSessions;
 import com.iohao.game.simple.SimpleRunOne;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;
@@ -22,8 +22,10 @@ import java.util.List;
 public class GameApp {
     public static void main(String[] args) {
         // 设置 json 编解码。
-        IoGameGlobalSetting.me().setDataCodec(new JsonDataCodec());
+        //IoGameGlobalSetting.me().setDataCodec(new JsonDataCodec());
 
+        // 设置 用户钩子接口，用户上线时、下线时会触发
+        UserSessions.me().setUserHook(new MyUserHook());
 
         SpringApplication.run(GameApp.class, args);
         // 游戏对外服端口
@@ -31,9 +33,7 @@ public class GameApp {
         // spring 逻辑服
         var demoLogicServer = new SpringLogicServer();
         SimpleRunOne one = new SimpleRunOne();
-        one.setExternalServer(createExternalServer(port))
-                .setLogicServerList(List.of(demoLogicServer))
-                .startup();
+        one.setExternalServer(createExternalServer(port)).setLogicServerList(List.of(demoLogicServer)).startup();
     }
 
     private static ExternalServer createExternalServer(int port) { //开启心跳功能，有时候退出并没有那么快

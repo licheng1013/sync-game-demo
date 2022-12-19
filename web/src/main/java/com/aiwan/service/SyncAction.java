@@ -1,14 +1,20 @@
 package com.aiwan.service;
 
+import cn.hutool.core.util.RandomUtil;
 import com.aiwan.ActionRouter;
+import com.aiwan.Login;
 import com.aiwan.Move;
 import com.iohao.game.action.skeleton.annotation.ActionController;
 import com.iohao.game.action.skeleton.annotation.ActionMethod;
-import com.iohao.game.action.skeleton.core.CmdKit;
-import com.iohao.game.action.skeleton.protocol.RequestMessage;
-import com.iohao.game.bolt.broker.client.external.bootstrap.ExternalKit;
+import com.iohao.game.action.skeleton.core.CmdInfo;
+import com.iohao.game.action.skeleton.core.flow.FlowContext;
+import com.iohao.game.bolt.broker.client.kit.UserIdSettingKit;
 import com.iohao.game.bolt.broker.core.client.BrokerClientHelper;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * @author lc
@@ -18,12 +24,37 @@ import lombok.extern.slf4j.Slf4j;
 @ActionController(ActionRouter.SYNC)
 @Slf4j
 public class SyncAction {
-    @ActionMethod(ActionRouter.V1)
-    public void sync(Move move) {
-        log.info("收到消息: ${}",move);
-        RequestMessage message = ExternalKit.createRequestMessage(CmdKit.merge(ActionRouter.SYNC, ActionRouter.V1), move);
+
+    public static Collection<Long> UserIds = new ArrayList<>();
+
+
+    @ActionMethod(ActionRouter.V3)
+    public void login(FlowContext fc){
+        int anInt = RandomUtil.randomInt(100, 300);
+        boolean success = UserIdSettingKit.settingUserId(fc, anInt);
+        Login login = new Login();    // channel 中设置用户的真实 userId；
+        if (success) {
+            log.info("登入成功");
+            UserIds.add((long) anInt);
+            login.setUserIds((List<Long>) UserIds);
+            login.setUserId((long) anInt);
+            // 默认的广播上下文
+            var broadcastContext = BrokerClientHelper.me().getBroadcastContext();
+            broadcastContext.broadcast(CmdInfo.getCmdInfo(ActionRouter.SYNC, ActionRouter.V3),login,UserIds);
+        }
+
+    }
+
+
+    @ActionMethod(ActionRouter.V2)
+    public void test(Move move,FlowContext fc) {
+        if (move == null) {
+            return;
+        }
+        move.setUserId(fc.getUserId());
         // 默认的广播上下文
         var broadcastContext = BrokerClientHelper.me().getBroadcastContext();
-        broadcastContext.broadcast(message.createResponseMessage());
+        broadcastContext.broadcast(CmdInfo.getCmdInfo(ActionRouter.SYNC, ActionRouter.V2),move,UserIds);
     }
+
 }

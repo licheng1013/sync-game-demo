@@ -1,10 +1,9 @@
 package com.aiwan;
 
-import com.iohao.game.action.skeleton.core.DataCodecKit;
-import com.iohao.game.action.skeleton.core.codec.JsonDataCodec;
-import com.iohao.game.bolt.broker.client.external.bootstrap.ExternalKit;
-import com.iohao.game.bolt.broker.client.external.bootstrap.message.ExternalMessage;
+import com.iohao.game.action.skeleton.core.codec.DataCodec;
+import com.iohao.game.action.skeleton.core.codec.ProtoDataCodec;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.drafts.Draft_6455;
@@ -13,34 +12,29 @@ import org.java_websocket.handshake.ServerHandshake;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
+import java.util.function.Function;
 
 /**
  * @author lc
  * @since 2022/12/19
  */
 @Getter
+@Setter
 @Slf4j
 public class MyWebSocketClient extends WebSocketClient {
-    private final JsonDataCodec codec = new JsonDataCodec();
-    private BasicGameApp basicGameApp;
+    public static final DataCodec codec = new ProtoDataCodec();
+    private Function<MyWebSocketClient, MyWebSocketClient> func;
+    private Function<ByteBuffer, Boolean> messageFunc;
 
-    public MyWebSocketClient(String wsUrl, BasicGameApp basicGameApp) throws URISyntaxException {
+
+    public MyWebSocketClient(String wsUrl, Function<MyWebSocketClient,MyWebSocketClient> func) throws URISyntaxException {
         super(new URI(wsUrl), new Draft_6455());
-        this.basicGameApp = basicGameApp;
+        this.func = func;
     };
-
-    public MyWebSocketClient(URI serverUri) {
-        super(serverUri);
-    }
 
     @Override
     public void onOpen(ServerHandshake open) {
-        log.info("打开链接");
-        Move move = new Move();
-        move.setUp(10);
-        ExternalMessage externalMessage = ExternalKit.createExternalMessage(ActionRouter.SYNC, ActionRouter.V1, move);
-        byte[] bytes = codec.encode(externalMessage);
-        this.send(bytes);
+        this.func.apply(this); //TODO 初始化回调
     }
 
     @Override
@@ -50,15 +44,7 @@ public class MyWebSocketClient extends WebSocketClient {
 
     @Override
     public void onMessage(ByteBuffer byteBuffer) {
-        // 接收服务器返回的消息
-        byte[] dataContent = byteBuffer.array();
-        ExternalMessage message = DataCodecKit.decode(dataContent, ExternalMessage.class);
-        log.info("收到消息 ExternalMessage ========== \n{}", message);
-        byte[] data = message.getData();
-        if (data != null) {
-            Move move = codec.decode(data, Move.class);
-            log.info("helloReq ========== \n{}", move);
-        }
+        this.messageFunc.apply(byteBuffer);
     }
 
     @Override
@@ -69,5 +55,13 @@ public class MyWebSocketClient extends WebSocketClient {
     @Override
     public void onError(Exception ex) {
 
+    }
+
+    @Override
+    public void connect() {
+        if (this.messageFunc == null) {
+            throw new RuntimeException("请注册消息接受器！");
+        }
+        super.connect();
     }
 }
