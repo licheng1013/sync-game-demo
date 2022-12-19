@@ -19,14 +19,6 @@
 
 
     <dependencies>
-
-        <!--IoGame组件-->
-        <dependency>
-            <groupId>com.iohao.game</groupId>
-            <artifactId>bolt-run-one</artifactId>
-            <version>17.1.25</version>
-        </dependency>
-
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
