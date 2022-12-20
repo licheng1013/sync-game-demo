@@ -102,11 +102,16 @@ public class BasicGameApp extends GameApplication {
     }
 
     private void sendMove(Move d) {
+        Entity entity = userMap.get(userId);
+        if (entity != null) {
+            log.info("x: {}, y: {}",entity.getX(),entity.getY());
+        }
+
         invoke(CmdKit.merge(ActionRouter.SYNC, ActionRouter.V2), (v) -> {
             byte[] data = v.getData();
             if (data != null) {
                 Move move = MyWebSocketClient.codec.decode(data, Move.class);
-                log.info("helloReq ========== \n{}", move);
+                log.info("收到移动消息: {}", move);
                 this.move(move);
             }
             return null;
@@ -137,6 +142,9 @@ public class BasicGameApp extends GameApplication {
 
     }
     public static void main(String[] args) {
+//        IoGameGlobalSetting.me().setDataCodec(new JsonDataCodec());//设置为Json
+//        MyWebSocketClient.codec = new JsonDataCodec();
+
         launch(args);
     }
 

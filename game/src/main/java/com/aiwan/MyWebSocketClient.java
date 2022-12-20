@@ -22,7 +22,7 @@ import java.util.function.Function;
 @Setter
 @Slf4j
 public class MyWebSocketClient extends WebSocketClient {
-    public static final DataCodec codec = new ProtoDataCodec();
+    public static  DataCodec codec = new ProtoDataCodec();
     private Function<MyWebSocketClient, MyWebSocketClient> func;
     private Function<ByteBuffer, Boolean> messageFunc;
 
