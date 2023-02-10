@@ -23,11 +23,11 @@ import java.util.function.Function;
 @Slf4j
 public class MyWebSocketClient extends WebSocketClient {
     public static  DataCodec codec = new ProtoDataCodec();
-    private Function<MyWebSocketClient, MyWebSocketClient> func;
+    private FunctionT<MyWebSocketClient> func;
     private Function<ByteBuffer, Boolean> messageFunc;
 
 
-    public MyWebSocketClient(String wsUrl, Function<MyWebSocketClient,MyWebSocketClient> func) throws URISyntaxException {
+    public MyWebSocketClient(String wsUrl, FunctionT<MyWebSocketClient> func) throws URISyntaxException {
         super(new URI(wsUrl), new Draft_6455());
         this.func = func;
     };

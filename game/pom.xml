@@ -35,7 +35,7 @@
         <dependency>
             <groupId>com.iohao.game</groupId>
             <artifactId>bolt-run-one</artifactId>
-            <version>17.1.25</version>
+            <version>17.1.31</version>
         </dependency>
 
         <dependency>

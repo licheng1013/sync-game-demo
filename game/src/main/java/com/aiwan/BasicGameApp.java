@@ -19,7 +19,6 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.function.Function;
 
 
 /**
@@ -29,7 +28,7 @@ import java.util.function.Function;
 @Slf4j
 public class BasicGameApp extends GameApplication {
 
-    public static HashMap<Integer, Function<ExternalMessage, ExternalMessage>> MessagesFunc = new HashMap<>();
+    public static HashMap<Integer, FunctionT<ExternalMessage>> MessagesFunc = new HashMap<>();
 
     private MyWebSocketClient webSocketClient = null;
 
@@ -62,9 +61,7 @@ public class BasicGameApp extends GameApplication {
                         }
                         this.sendMove(new Move());
                     }
-                    return null;
                 });
-                return null;
             });
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
@@ -73,7 +70,7 @@ public class BasicGameApp extends GameApplication {
             // 接收服务器返回的消息
             byte[] dataContent = byteBuffer.array();
             ExternalMessage message = DataCodecKit.decode(dataContent, ExternalMessage.class);
-            Function<ExternalMessage, ExternalMessage> function = MessagesFunc.get(message.getCmdMerge());
+            FunctionT<ExternalMessage> function = MessagesFunc.get(message.getCmdMerge());
             if (function == null) {
                 log.info("未找到路由：收到消息 ExternalMessage ========== \n{}", message);
                 return null;
@@ -86,12 +83,12 @@ public class BasicGameApp extends GameApplication {
     }
 
 
-    private void invoke(int merge, Function<ExternalMessage, ExternalMessage> func) {
+    private void invoke(int merge, FunctionT<ExternalMessage> func) {
         log.info("发送消息");
         invoke(merge, func, null);
     }
 
-    private void invoke(int merge, Function<ExternalMessage, ExternalMessage> func, @Nullable Object obj) {
+    private void invoke(int merge, FunctionT<ExternalMessage> func, @Nullable Object obj) {
         log.info("发送消息1");
         MessagesFunc.putIfAbsent(merge, func);
         ExternalMessage externalMessage = ExternalKit.createExternalMessage(CmdKit.getCmd(merge), CmdKit.getSubCmd(merge), obj);
@@ -114,7 +111,6 @@ public class BasicGameApp extends GameApplication {
                 log.info("收到移动消息: {}", move);
                 this.move(move);
             }
-            return null;
         }, d);
     }
 
